@@ -7,14 +7,33 @@
 
 import UIKit
 import CoreData
+import Network
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    var internetStatus = false
+    var internetType = ""
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+
+        let monitor = NWPathMonitor()
+            monitor.start(queue:DispatchQueue.global())
+            monitor.pathUpdateHandler = { path in
+            if path.status == .satisfied {
+                self.internetStatus = true
+                if path.usesInterfaceType(.wifi) {
+                    self.internetType = "WiFi"
+                }
+                else {
+                    self.internetType = "no WiFi"
+                }
+            }
+            else {
+                self.internetStatus = false
+                self.internetType = ""
+            }
+        }
         return true
     }
 
@@ -69,10 +88,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             do {
                 try context.save()
             } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                fatalError("Unresolved error")
             }
         }
     }
